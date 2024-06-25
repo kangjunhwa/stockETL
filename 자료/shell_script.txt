@@ -1,0 +1,1753 @@
+tar 명령어 정리하기
+set 옵션에 대해 정리하기
+grep 명령어에 대해 정리하기
+eval에 대해 정리 할것
+wget curl에 대해 정리할 
+read에 대해 정리할 것들
+cut 명령어 정리할것
+char substring, indexof 등 알아볼것
+date 관련 옵션 날짜 계산
+iconv, convmv 명령어에 대해 알아볼것
+
+
+#################################################
+# 변수의 선언
+# = 좌 우에 공백이 있으면 에러가 발생함.
+# = 은 변수 할당의 의미도 있지만 테스트의 의미도 있다 
+# 테스트를 할 때는 좌우에 공백을 포함해야 한다.
+#################################################
+  var="test"
+  var = "test" #에러발생
+  a=212
+  echo $a #결과 212
+  
+  let a=87+10
+  echo $a #결과 97
+  아래는 for loop에서 변수를 할당하는 방법 입니다.
+  for a in 7 8 9 11
+   do
+     echo -e "$a 입니다."
+  done
+
+#################################################
+# BASH에서 타입을 지정하여 변수 선언하기
+#################################################
+-read only 변수 선언하기(변수 값을 바꾸려고 하면 에러가 발생한다.)
+ declare -r var1="readonly"
+-정수형 변수 선언하기(문자형을 할당하면 값이 0으로 변경이 된다.)
+ declare -i num=100
+ num="hundread"
+ 아래 코드를 실행하면 0을 출력한다.
+ echo $num 
+- 배열 변수 선언하기
+ declare -a arr
+
+#################################################
+# 변수의 치환
+# 쿼팅 사용방법
+#################################################
+echo var    #var 라는 문자를 출력
+echo $var   #var 변수에 할당된 값을 출력
+echo ${var} #var 변수에 할당된 값을 출력
+
+var1="a b  c     d"
+echo $var1
+결과 : a b c d
+아래처럼 변수에 더블쿼팅 해주면 공백을 보존해 준다.(공백이 있는 경우 더블쿼팅 해준다.)
+echo "$var1"
+결과 : a b  c     d
+아래처럼 변수에 싱글쿼팅 해주면 변수를 해석하지 않고 문자열을 출력한다.
+작은 따옴표(' ')도 큰 따옴표와 비슷하게 동작하지만 $의 특별한 의미를 꺼 
+버려서 변수 참조가 일어나지 않게 합니다. 
+작은 따옴표안의 '을 제외한 모든 특수 문자들은 단순히 문자 그대로 해석됩니다
+echo '$var1'
+결과 : $var1
+
+쿼팅 없이 아래 처럼 명령을 수행하면 a나 c로 시작하는 파일을 검색해 준다.
+ls -al [ac]*
+
+
+#################################################
+# 변수와 null의 처리
+# 값을 할당하기 전에 변수를 사용하면 문제가 생길 수 있음
+# 예를 들어 변수로 업데이트 sql을 생성하는 경우 아래와 같은 구분이 생길수 있음
+# set col1=,
+#################################################
+null 값을 변수에 할당 하는 방법
+var2=
+변수에 값을 할당했다가 null로 바꾸는 unset 명령어
+unset var2
+
+export 명령으로 변수 할당하는 방법
+export VAR="abc" 
+ 
+#################################################
+# BASH 문자열 조작
+#################################################
+var="abcDE12345abcDE12345"
+- 문자열의 길이를 리턴
+  echo ${#var}
+- 문자열 자르기 처음부터 3자리 자르기(결과:abc)
+  echo ${var:0:3}
+-아래 명령은 3번째 부터 3글자 자르기(결과:DE1)
+  echo ${var:3:3}
+- 주어진 자릿수 부터 문자열 끝까지 자르기(결과:12345abcDE12345)
+  echo ${var:5}
+- 주어진 문자에서 앞에서부터 일치하는 문자 중 짧게 일치하는 문자 제거하기(결과:E12345abcDE12345)
+  - a*D 패턴과 일치하는 패턴이 2번있는데 짧게 일치하는 경우를 제거하고 리턴한다. 
+  echo ${var#a*D}
+- 주어진 문자에서 앞에서부터 일치하는 문자 중 길게 일치하는 문자 제거하기(결과:E12345)
+  - a*D 패턴과 일치하는 패턴이 2번있는데 짧게 일치하는 경우를 제거하고 리턴한다. 
+  echo ${var##a*D}
+- 주어진 문자에서 뒤에서 부터 일치하는 문자 중 짧게 일치하는 제거하기(결과:abcDE12345abcD)
+  echo ${var%E*5}
+- 주어진 문자에서 뒤에서 부터 일치하는 문자 중 길게 일치하는 제거하기(결과:abcD)
+  echo ${var%%E*5}
+- 주어진 문자에서 일치하는 경우 처음만 찾아 바꾸기(결과:abcabcDE12345)
+  echo ${var/DE12345/}
+- 주어진 문자에서 일치하는 경우 처음만 찾아 바꾸기(결과:AAAA12345)
+  echo ${var/abcDE12345abcDE/AAAA}  
+- 주어진 문자에서 일치하는 경우를 모두를 찾아 바꾸기(결과:abcabc)
+  echo ${var//DE12345/}
+- 주어진 문자에서 일치하는 경우를 모두를 찾아 바꾸기(결과:abcDE*****abcDE*****)
+  echo ${var//12345/*****}
+- 주어진 문자에서 제일 앞에서 부터 일치하는 경우를 찾아 바꾸기(결과:12345)
+  echo ${var/#abcDE12345abcDE/}
+  아래와 같이 중간에 일치하는 경우는 찾지 못한다.(결과:abcDE12345abcDE12345 ) 
+  echo ${var/#DE12345/}
+- 주어진 문자에서 제일 뒤에서 부터 일치하는 경우를 찾아 바꾸기(결과:abcDE12345abc)
+  echo ${var/%DE12345/}
+
+
+
+#################################################
+# random 한 정수 생성하기
+#################################################
+ cnt=1
+ while [ $cnt -le 10 ]
+   do
+     cnt=$(($cnt+1))
+     num=$RANDOM
+	 echo $num
+ done 
+ 
+# 500 보다 작은 random한 정수 뽑아내기
+  num=$(($RANDOM % 500))
+  echo $num
+
+# 특정숫자보다 큰 random한 정수 뽑아내기
+  아래의 코드는 random 숫자가 주어진 숫자보다 작으면 
+  while문을 계속 돌고 주어진 숫자보다 크면 while문을 빠져 나온다.
+FLOOR=20000
+number=0   # 초기화
+while [ "$number" -le $FLOOR ]
+do
+  number=$RANDOM
+  echo $number
+done
+echo "$FLOOR 보다 큰 랜덤한 숫자  ---  $number"
+echo
+
+# random 발생 시 seed 설정하기
+아래 코드는 시드값을 설정을 통해 다시 실행시 동일한 RANDOM값을 발생시킨다.
+RANDOM=20190705
+cnt=0
+while [ $cnt -le 3 ]
+  do
+    number=$RANDOM
+	echo $number
+	cnt=$(($cnt+1))
+done
+ 
+
+################################################
+#특수문자의 해석을 금지하는 방법.
+################################################
+• 작은 따옴표 : 특수 문자에 대한 모든 해석을 금지하는 방법.
+• 큰 따옴표 : 특수 문자에 대한 대부분의 해석을 억제하는 방법.
+
+################################################
+#콤마 연산자
+# 연속적인 산술 연한을 하려할때 사용합니다.
+# 모든계산이 이루어 진 뒤 마지막에 계산되 결과만 리턴됩니다.
+################################################
+아래문장은 a=9로 할당되고 t2는 5로 할당됩니다.
+t2=$(( a = 9, 15 / 3))
+
+########################################
+# null명령(:) if문 안에서 아무것도 할 필요 없을 때 사용
+# if와 then을 같은 라인에 두고 싶은 경우는 ;을 넣어준다.
+########################################
+if [ -f "$filename" ]; then
+  :
+else
+  echo "파일이 존재하지 않습니다." 
+fi
+
+아래명령어는 파일을 빈파일로 만든다.
+: > 1.txt
+cat /dev/null 1.txt
+$PATH의 경로 구분자로 사용됩니다.
+
+########################################
+# 배열 초기화
+########################################
+Array=(element1 element2 element3)
+
+########################################
+# 중괄호의 확장
+########################################
+아래 명령어는 file로 시작하고 확장자가 txt,html,htm인 파일중에서
+Linux 문자가 들어간 파일을 검색한다.
+grep Linux file*.{txt,htm*}
+
+########################################
+# 작업 프로세스 백그라운드로 돌리기
+########################################
+아래 명령어는 10초 동안 프로프트가 안떨어지는데 &를 붙이면
+백그라운드로 실행된다.
+sleep 10
+sleep 10 &
+
+
+############################################
+#문자열 변수에 할당하기 
+############################################
+아래코드는 -a 옵션을 줬기 때문에 words 라는 배열변수에
+단어들이 할당된다. 주로 데이터베이스의 결과값을 할당할때 사용한다.
+String="This is a string of words."
+read -r -a Words <<< "$String"
+
+데이터 베이스에서 1개의 레코드를 읽어서 컬럼값을 변수에 할당할 때는 아래와 같이 쓴다.
+IFS=" | " read userid password desc <<$(echo ${record}) 
+
+
+########################################
+# 쉘 스크립트에서 특수문자의 의미
+########################################
+1. 세미콜론
+ - 세미콜론을 이용하여동일한 행에 두 개 이상의 명령을 넣을 수 있습니다.
+   세미콜론 다음에는 공백이 있어야 합니다.
+   echo "File $filename exists."; cp $filename $filename.bak
+
+ -  case 문에서 종결자로 ;;를 사용합니다.
+    type=$1
+    case $type in 
+        *[!0-9]*)
+            echo "$type" "is not numeric parameter!"
+        ;;
+        *)
+           echo "$type" "is numeric parameter!"
+        ;;
+     esac
+2. 닷(점)
+   - 쉘스크립트에서 외부파일을 include할때 source 명령어와 동일한 의미로
+     . 을 사용합니다.
+   - 숨김 파일의 접두어로 사용됩니다.
+   - cd 등 경로 관련 명령어에서 현재 디렉토리의 의미로도 사용됩니다.
+     아래명령어는 /home/bigsql/밑의 모든파일을 현재 디렉토리로 이동하라는 명령이다.
+     cp /home/bigsql/* .
+   - ..은 상위 디렉토리의 의미로 사용됩니다.
+   - 정규표현식에서는 하나의 문자와 일치함을 듯합니다.
+########################################
+#시스템에 로그온 한 모든 사용자를 표시합니다
+########################################
+who
+who -m #현재사용자의 정보를 제공합니다.
+whoami #who -m와 유사하지만 사용자 이름만 나열합니다.  
+logname #현재사용자의 로그인 이름을 표시합니다.
+        #bigsql로 로그인하여 su를 이용하여 root로 스위칭 한후 whoami를 실행하면 root를
+        #리턴하지만 logname을 실행하면 bigsql을 리턴합니다.
+########################################
+#log 파일 빈 파일로 만들기
+########################################
+cat /dev/null > 1.log
+
+########################################
+# set 명령어 옵션
+########################################
+set -u : 쉘스크립트의 변수가 할당되지 않으면 자동 종료하기
+set -e : 쉘스크립트내의 명령어 실행결고가 0(성공)이 아닌 경우 종료하기
+set -x : 쉘스크립트의 변수 할당 상황 모니터링
+set +e : 쉘스크립트에서 set -e 설정을 일시적으로 정지 시킵니다.
+
+명령어 실행뒤에 ||: (or 조건과 null명령어를 전달하면 실행결과가 무조건 0 이므로)
+set -e를 회피 할 수 있다.
+
+########################################
+# how to use cp option
+########################################
+#원본파일 존재시 원본 복사본 만들고 복사.
+cp -b /tmp/fetch.err /tmp/dir1
+   마지막에 "~" 붙어서 생성됨
+
+#원본파일 존재시 원본을 지우고 복사
+cp -f /tmp/fetch.err /tmp/dir1
+
+#원본디렉토리에 하위폴더 존재시 폴더까지 복사.
+cp -R /tmp/dir1/ /tmp/dir2/
+
+#root로 실행할때만 가능함. 원본파일 복사시에 퍼미션 오너 시간정보를 보존하여 복사.
+cp -p /tmp/dir1/ /tmp/dir2/
+
+#############################################################
+# 표준 입출력
+#############################################################
+1. 표준 출력 파일로 보내기
+cat 1.txt > 1.log
+
+2. 표준에러 파일로 보내기
+cat 2.txt 2> 2.log
+
+3. 표준 출력을 표준에러로 보내기
+cat 1.txt 2.txt 1>&2 1.log
+
+cat notexist > /dev/null 2>&1
+notexist 파일의 cat 명령 표준 출력 결과를 /dev/null 로 리다이렉션 시킨다.
+실행한 결과와 에러 모두를 표시하지 않음
+
+abcd > /dev/null 2>&1
+명령 abcd 의 결과를 /dev/null 로 보내 흡수시킨다.
+즉 abcd 는 존재하지 않는 명령어기 때문에 발생한 에러를 출력하지 않음
+
+실행결과의 표준출력과 표준에러를 화면과 동시에 파일에 출력 하고 싶을때
+cat 1.txt 2.txt 2>&1 | tee -a 1.log
+만약 1.txt 파일은 있고 2.txt 파일이 없는 경우 
+1.txt 파일의 내용과 2.txt가 없기 때문에 에러로그기 1.log에 기록 되게 된다.
+
+
+#############################################################
+# 쉘스크립트 자체변수
+#############################################################
+$$ : 쉘자체의 pid
+$* : 모든 매개변수
+$@ : 모든 매개변수 IFS에 영향을 받지 않음
+$0 : 실행된 쉘파일 이름
+$1~$2 : 위치파라메터
+$? : 이전에 실행했던 명령어의 exit code
+${#} : 파라메터의 전체 갯수
+${#1} : 첫번째 파라메터의 문자 길이
+##############################################################
+# --- 명령어 실행하고 정상적으로 실행되었는지 확인하기
+##############################################################
+service mysql start
+if [ $? -ne 0 ]; then
+   log_it "Could not start MySQL service"
+   exit 1
+fi
+#############################################################
+# 퍼미션 변경 스크립트
+#############################################################
+function setperm {
+  chown $1:$2 $1.*.keytab
+  chmod 600 $1.*.keytab
+}
+
+#############################################################
+# 문자열 숫자의 if 비교
+#############################################################
+둘다 참일 때
+a=1
+b=3
+#아래 결과는 b가 2보다 크므로 false
+if [[ ${a} < 2 && ${b} < 2 ]]
+   echo "true"
+else
+   echo "false"
+fi
+
+#아래 결과는 a가 2보다 작으므로 true
+if [[ ${a} < 2 || ${b} < 2 ]]
+   echo "true"
+else
+   echo "false"
+fi
+
+*** 문자의 연산
+ if [ "s1" = "s2" ] ## if [ "s1" == "s2" ]
+ if [ "s1" != "s2" ]
+ 알파벳 순서의 크고 작음(대괄호 2개를 사욯할 것)
+ if [[ "s1" > "s2" ]]
+ if [[ "s1" < "s2" ]]
+
+ 
+//문자열이 null인지 비교시 
+// null을 선언하는 방법은 a= 또는 a=""
+아래 문장은 var가 null이 아니면 이라는 뜻
+if[[ -n "$var" ]]; then
+  echo "var is not null"
+fi
+//문자열이 zero length인지 비교시
+if[[ ! -z "$var" ]]; then
+  echo "var is not zero length"
+fi
+
+var=""
+if[[ -n "$var" ]]; then
+  echo "var=\"\" is zero is not null"
+else
+  echo "var=\"\" is null"
+fi
+
+var="abcd"
+if[ ! -z "$var" ]; then
+  echo "var\'s not zero length "
+fi
+ 
+if [ condition1 ]; then
+   command1
+elif [ condition2 ]; then
+   command2
+else
+   default-command
+fi
+ 
+ 
+*** 숫자연산
+-lt 
+-gt  
+-le  
+-ge  
+-eq  
+-ne   
+ 
+var1="abc"
+if [$var1 = "abc"]; then
+    echo "var1 is abc"
+fi
+
+num=123
+if [ num -eq 123 ]; then
+    echo "num is 123"
+fi
+
+#############################################################
+# for loop 돌리기
+#############################################################
+## from과 to를 지정하여 루프 돌리기
+for num in {1..19}; do 
+    echo $num
+done
+
+## 공백을 구분자로 하여 루프 돌리기
+for day in monday sunday friday; do
+  echo $day
+done
+
+## 각 인자가 여러개의 list를 갖는 루프돌리기
+## set 명령어를 통해 위치 파라메터인 $1, $2에 할당이 됩니다.
+for day in "monday mon" "sunday sun" "friday fri"; do
+  set -- $day
+  echo "$1"
+  echo "$2"
+done
+
+## in 절이 없는 for 루프 돌리기
+## 아래 코드를 for_loop.sh로 저장하고 sh for_loop.sh 111 222 333 444
+## 파라메터를 순차적으로 출력한다.
+for a
+do
+ echo -e "$a "
+done
+
+## 쌍따온표된 문자열의 루프돌리기
+## 아래의 경우 루프가 한번만 돈다.
+for day in "monday sunday friday"; do
+  echo $day
+done
+
+
+## 디렉토리의 파일의 리스트를 이용한 루프 돌리기
+for file in /root/*.log
+  do
+   echo $file
+done
+
+## 명령어 실행 결과를 이용한 루프 돌리기
+for filename in $(ls); do 
+     echo $filename
+done
+
+
+## 명령어 실행 결과를 이용한 루프 돌리기
+## 첫번째 파라메터로 디렉토리를 받고 2번째 파라메터로 찾을 문자열을 입력하면
+## 해당 디렉토리에서 해당문자열이 있는 파일을 찾아 준다.
+dir=$1
+char=$2
+for file in $( find $dir -type f -name '*' | sort ); do
+   strings -f $file | grep "$char"
+done
+
+#############################################################
+# while loop 돌리기
+#############################################################
+
+## 명령어 실행 결과를 이용한 루프 돌리기 
+## 명령어의 결과나 문자열을 명령에 전달을 할때는 <<<를 사용한다.
+## 실행결과를 쌍따온표로 감싸지 않으면 줄바꿈 문자 없이 출력된다.
+while read line
+  do 
+     echo "$line"
+done <<< "$(ls -al)"
+
+##파일에서 읽어 들인 line을 가지고 loop
+while read line
+   do 
+     echo $line
+done < test.csv
+
+##배열의 요소를 이용하여 루프 돌리기
+ArrayVar=( element0 element1 element2 )
+while read element ; do
+  echo "$element" 
+done <<< $(echo ${ArrayVar[*]})
+
+##지정된 횟수만큼 루프돌리기
+cnt=0
+while [ $cnt -le 10 ];  do
+   echo $cnt
+   cnt=$(($cnt+1))
+done
+
+cnt=0
+
+
+## 파일에서 구분자를 지정하여 읽기
+while IFS=',' read line
+  do 
+     echo $line
+done < test.csv
+
+## 라인을 구분자로 사용하여 컬럼 값을 배열로 읽어 들이기
+while IFS=',' read -a line ;
+  do 
+     for col in "${line[@]}";
+        echo $col
+	 done
+done < test.csv
+
+## 라인을 구분자로 사용하여 컬럼 값을 쉘변수에 저장하기
+while IFS=',' read id name insertdate year month ;
+  do 
+     echo $id
+	 echo $name
+	 echo $insertdate
+	 echo $year
+done < test.csv
+
+#############################################################
+# continue와 break를 이용하여 루프 제어하기
+#############################################################
+cnt=0
+while [ $cnt -le 9 ]; do
+  cnt=$(($cnt+1)) 
+  if [ $(($cnt%3)) -eq 0 ]; then
+    continue
+  fi
+   echo  $cnt
+done
+
+cnt=0
+while [ $cnt -le 9 ]; do
+  cnt=$(($cnt+1))  
+  if [ $(($cnt%3)) -eq 0 ]; then
+    break
+  fi
+   echo -e $cnt
+done
+
+
+
+#############################################################
+# read를 이용한 사용자 입력 처리하기
+#############################################################
+
+echo -n "Enter Your Name >"
+#사용자 입력을 name이라는 변수에 저장한다.
+read name
+
+echo "Hi "$name
+
+#############################################################
+# 정수 산술 계산하기
+#############################################################
+echo $((10+50))
+echo $[10+50]
+아래 실행결과는 5의 3제곱이라는 뜻
+echo $((5**3))
+아래 실행결과는 5의 3의 나머지 뜻
+echo $((5%3))
+
+아래 실행결과는 a에 5를 증가시킨 값
+a=5
+echo $((a+=5))
+아래 실행결과는 a에 5를 감소시킨 값
+a=5
+echo $((a-=5))
+아래 실행결과는 a에 5를 곱한 값
+a=5
+echo $((a*=5))
+아래 실행결과는 a에 5를 나눈 값
+a=5
+echo $((a/=5))
+
+산술연산은 아래와 같이 expr 또는 let 식으로 쓰입니다.
+echo `expr 1 + 2`
+아래의 결과는 2입니다.
+n=1; 
+let "n = $n + 1"  
+아래의 결과는 위와 동일 하다.
+let "n = n + 1" 
+#############################################################
+# 비트연산자로 계산하기
+# <= 또는 <<<=는 정상 동작 하지 않음
+#############################################################
+아래는 var에 2를 2번 곱한것과 동일하다.
+var=2
+let "var <<= 2"
+
+아래는 var에 2를 2번 나눈과 동일하다.
+var=8
+let "var >>= 2"
+
+#############################################################
+# 소소점 산술 계산하기
+#############################################################
+bash에서는 아래와 같인 소숫점을 연산하면 에러가 발생합니다.
+echo $((10.5+50.5))
+소숫점 연산을 하려면 아래처럼 bc를 통해 해야 합니다.
+echo 10.5+50.5 | bc
+
+num=$(echo 10.5+50.5 | bc)
+
+#############################################################
+# passwordless ssh를 이용하여 여러서버에 명령실행
+# passwordless ssh를 이용하여 여러서버에 파일 복사
+#############################################################
+#!/bin/bash
+while read line
+  do
+    ssh -n $line 'ls -al /tmp/'
+done < servers.txt
+
+#!/bin/bash
+for hostnm in bdicr101x{07..16}h2
+do 
+scp $1 $hostnm:$2
+done
+
+#!/bin/bash
+for hostnm in bdicr101x0{7..16}h2
+  do
+    ssh -n hostnm $1
+done
+
+while read line
+ do
+   echo $line
+done <<< `ls-al`
+
+for filename in $(ls -al /tmp)
+   do 
+      echo filename
+done
+
+#############################################################
+#  로그파일 만들때 처음 시작부분
+#  basename은 경로 부문을 떼어낸 소스파일 이름이다.
+#############################################################
+function banner() {
+    echo "*********************************"
+    log_it "*** Starting: `basename ${BASH_SOURCE[0]}` Version: $VERSION ***"
+    echo "*********************************"
+}
+#############################################################
+#  쉘스크립트 시작시 파라메터 갯수 체크
+#############################################################
+if [ ${#} -lt 2 ]; then
+  print_usage
+  exit 1
+fi
+
+#############################################################
+#  패키지가 이미 설치되어 있으면 종료 시키기
+#############################################################
+if rpm -qa | grep -q $package_name; then
+    die "Package $package_name is already installed. Uninstall it first" 0
+fi
+#############################################################
+#   echo $? 를 실행시켜서  IS_MYSQL 변수에 할당한다.
+#############################################################
+export IS_MYSQL=`yum list -q installed MySQL-server > /dev/null 2> /dev/null; echo $?`
+if [ $IS_MYSQL -eq 0 ] ; then
+    log_it "INFO: Already installed MySQL Server.  Skipping."
+    ## Start service just to be sure
+    log_it `service mysql start`
+
+    ## Enable mysql service at boot
+    /sbin/chkconfig mysql on
+
+     exit 0
+fi
+#############################################################
+#  --- Exit function
+# ${2:--1} => 2번째 파라메터가 없을때는 exit -1
+#############################################################
+function die() {
+    log_it "ERROR: ${1}"
+    exit ${2:--1};
+}
+#############################################################
+#  --- log_it function
+#############################################################
+function log_it () {
+    echo "$@"
+	echo "[$(date +"%Y%m%d %H%M%S")]: $@" > $LOG_FILE
+    #echo "[$(date +"%D %T")]: $@" >> $LOG_FILE
+}
+
+
+#############################################################
+#  로그파일이 있는지 체크후 로그파일 만들기
+#  -z 문자열 length is zero인지 비교시
+#  -n 문자열 null 비교시
+#############################################################
+if [ -z $LOG_FILE ]; then
+  mkdir -p $LOG_DIR
+  LOG_FILE=$LOG_DIR/mysql_install-$NOW.log
+fi
+
+##############################################################
+# awk를 이용해서 id 명령에서 uid와 id를 추출하기
+##############################################################
+echo `id|awk -F\( '{print $1}`
+uid=79444917
+echo `/usr/bin/id|awk -F\( '{print $1}'|awk -F= '{print $2}'`
+79444917
+echo `id|awk -F\( '{print $2}'|awk -F\) '{print $1}'`
+gpainstall
+##############################################################
+# --- Must run as root
+# 또는 whoami로 조회하는 방법과 id로 검색하는 방법이 있음
+##############################################################
+RUID=`/usr/bin/id|awk -F\( '{print $1}'|awk -F= '{print $2}'`
+if [ $RUID -ne 0 ];then
+    die  "You must be logged in as user with UID 0 (e.g. root user) to run $0 script." 1
+fi
+if [ `whoami` != "$INSTALL_ACCOUNT" ] ; then
+  echo "ERROR: This script needs to be ran as $INSTALL_ACCOUNT user and it is being ran as: $(whoami)"
+  exit 1
+fi
+
+##############################################################
+# --- 파일의 존재여부를 체크하여 있으면 복사하기
+&& 테스트 후 참이면 실행한다.
+|| 테스트 후 거짓 이면 실행한다.
+-d 디렉토리면 참
+-f 파일이 존재하고 일반파일이면 참
+-e 파일이 존재하면 참
+
+-r 읽을수 있으면 참 -w 쓸수 있으면 참 -x 실행할 수 있으면 참
+-s 파일이 존재하고 0바이트 보다 크면 참
+-L 파일이 존재하고 링크파일이면 참
+##############################################################
+[ -d /tmp/test ] && mkdir /tmp/test2; cp -R /tmp/test/* /tmp/test2/
+[ -f /tmp/cacerts ] && cp /tmp/cacerts /tmp/test/cacerts_test
+[ -e /tmp/cacerts ] && cp /tmp/cacerts /tmp/test/cacerts_test2
+[ -r /tmp/cacerts ] && cp /tmp/cacerts /tmp/test/cacerts_test3
+[ -w /tmp/cacerts ] && cp /tmp/cacerts /tmp/test/cacerts_test4
+[ -x /tmp/cacerts ] && cp /tmp/cacerts /tmp/test/cacerts_test5 || echo "now exists"
+[ -s /tmp/cacerts ] && cp /tmp/cacerts /tmp/test/cacerts_test6
+[ -L /tmp/ln_cacerts ] && cp /tmp/cacerts /tmp/test/cacerts_test7
+
+##############################################################
+hdfs test 옵션 > not working 
+##############################################################
+Usage: hadoop fs -test -[defsz] URI
+
+Options:
+
+-d: if the path is a directory, return 0.
+-e: if the path exists, return 0.
+-f: if the path is a file, return 0.
+-s: if the path is not empty, return 0.
+-r: if the path exists and read permission is granted, return 0.
+-w: if the path exists and write permission is granted, return 0.
+-z: if the file is zero length, return 0.
+
+
+##############################################################
+# 명령어 병행 실행 example
+##############################################################
+mkdir test;cd test
+; - 앞의 명령어가 실패해도 다음 명령어가 실행 
+mkdir test;cd test
+&& - 앞의 명령어가 성공했을 때 다음 명령어가 실행
+& - 앞의 명령어를 백그라운드로 돌리고 동시에 뒤의 명령어를 실행
+
+##############################################################
+# case 문에서 파라메터가 숫자 잇지 체크하기
+# case 문에서 종결자로 ;;를 사용합니다.
+##############################################################
+type=$1
+case $type in 
+      *[!0-9]*)
+            echo "$type" "is not numeric parameter!"
+        ;;
+        *)
+           echo "$type" "is numeric parameter!"
+        ;;
+esac
+
+##############################################################
+# case 문에서 or 조건 사용하기
+##############################################################
+host_type=$1
+case $host_type in 
+        MASTER|PROXY|EDGE|CM|DB)
+            echo "We have a valid host type: $host_type"
+        ;;
+        *)
+           echo "Wrong server type provided. Must be in MASTER, CM , DB or PROXY"
+           exit 1
+        ;;
+esac
+
+##############################################################
+# if 문에서 or 조건 사용하기
+# or 조건 전체를 []로 감싸줘야 한다.
+# && 또는 || 조건이 있을때 단일 대괄호는 에러를 발생시키지만 [[는 에러를 발생시키지만
+# 않는다.
+##############################################################
+host_type=$1
+if [[ $host_type == "PROXY" || $host_type == "MASTER" || $host_type == "CM" ]]; then
+    echo $host_type
+elif [[ $host_type == "DB" ]]; then
+    echo $host_type
+fi
+
+#############################################################
+# yum 명령어 옵션
+#############################################################
+yum install -y : 패키지를 설치한다. 의존성있는 패키지까지 설치한다.
+                 -y 옵션을 줄 경우 묻지 않고 바로 설치한다.
+yum update <패키지명>   : 패키지를 업데이트한다 패키지명이 없는경우
+                          전체시스템에서 update될 패키지를 확인한고
+						  업데이트를 한다.
+yum downgrade   :   downgrade a package
+yum search      :   Search package details for the given string	
+yum provides '*/httpd.conf':httpd.conf를 포함하고 있는 모든 패키지를 출력한다.
+yum repolist : 현재 활성화되 repolist를 출력한다.
+yum clean    :  Remove cached data
+yum localinstall : 다운로드 없이 로컬에있는 rpm을 가지고 설치하는경우
+                   rpm으로 설치할 수도 있지만 yum으로 설치하면
+				   설치기록이 남아서 rollback이 가능한다.
+yum history list all
+                 : yum 사용기록을 모두 볼수 잇다.
+yum history info <트랜젝션id>
+ex) yum history info 5
+                 : 해당 트랜젝션 id에 대해 상세히 볼때 사용한다.
+--downloadonly :don't update, just download
+                위의 옵션을 사용하기 위해서는 yum-downloadonly패키지를 설치해야 한다.
+ex) yum install yum-downloadonly
+--downloaddir  :specifies an alternate directory to store packages
+-v, --verbose  :       verbose operation
+--disablerepo=* : 레파지토리가 여러개 있는경우 disable 시킨다.
+--enablerepo="soe-bigdata-c5" 
+  : soe-bigdata-c5 를 enable 시킨다.
+  repo파일 명을 적는 게 아니라 repo파일 내부의 대괄호 안의 문자를
+  기술해준다.
+--nogpgcheck : GPG 서명검증을 사용하지 않는다.
+               해당 repo의 공개키가 없어서 실패할 경우 사용한다.
+#############################################################
+# 설치가능한 rpm 목록 출력을 위한 yum 명령어
+#############################################################
+예제
+for rpm in `yum list available --disablerepo=* --enablerepo="soe-bigdata-c5" | awk -F\. '{print $1}'`; do
+  f=`echo $rpm | awk -F '.' '{print $1}'`
+  echo $f
+  echo "############# RPM $f locations ##############" >> rpm_log.txt
+done
+
+############################################################
+# 현재 shell 스크립트가 실행되고 있는 경로 알아내기
+# 그냥 pwd와 동일함.
+# 쉘 스크립트안에서 자신의 파일명 알기
+############################################################
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+DIR=$( pwd )
+
+############################################################
+# getopts 사용
+# while getopts "ap:" option : 
+# 파라메터가 있는 옵션을 처리할때는 콜론(:)을 사용한다.
+# "$OPTARG"  
+# 파라메터가 있는 옵션에서 파라메터를 받는 시스템 변수다.
+# \?)
+# case 문에서 지정되지 않은 옵션을 처리할때 사용한다.
+# if [ -n $seperator ]; then
+# 문자열 비교시 null이 아닌때
+############################################################
+
+#!/bin/bash
+a_flag=0
+seperator=""
+
+while getopts "ap:" option
+    do
+       case $option in
+       a)
+         a_flag=1
+        ;;
+       p)
+         seperator="$OPTARG"
+        ;;
+       \?)
+         echo "invalid option"
+         exit 1
+       esac
+    done
+
+if [ $a_flag -eq 1 ]; then
+  ls -al /tmp
+else
+  ls /tmp
+fi
+
+if [ -n $seperator ]; then
+   echo $seperator
+fi
+
+########################################
+# 사용자의 입력을 처리하는 방법
+#########################################
+# -p 프롬프트를 얻는다.
+# response 사용자의 입력이 저장되는 변수
+# response=${response,,}
+# 소문자로 변환한다.
+#response=${response^^}
+# 대문자로 변환한다.
+# if [[ $response =~ (yes|y| ) ]]; then
+# 여러개의 문자를 비교하기 위한 방법
+########################################
+read -r -p "Are you sure? [Y/n] " response
+response=${response,,} # to lower
+if [[ $response =~ (yes|y| ) ]]; then
+    echo "your response is yes"
+elif [[ $response =~ (no|n| ) ]]; then
+    echo "your response is no"
+else
+    echo "your response is $response"
+fi
+
+
+
+
+########################################
+# how to use curl option
+########################################
+curl -k
+  https에서 다운로드 받을때 지정하는 옵션으로 --insecure와 동일한다.
+curl -O
+  파일을 다운로드 할때 리모트 파일명과 동일하게 파일 다운로드 한다.
+  동시에 여러 사이트에서 다운받을땐 아래처럼 한다.
+  curl -O $URL -O $URL -O $URL ....
+curl -u
+  해당사이트에 user:passward를 지정할때 사용한다.
+  curl -Ou admin:Cmpassdev1 -k https://XXXXXXXXXXXXXXXX:7183/api/v9/clusters/KRBDDEV/services
+curl -o 
+  다른이름으로 파일을 저장하려면 소문자 -o옵션을 사용한다. 
+  curl -o service.json -k https://XXXXXXXXXXXXXXXX:7183/api/v9/clusters/KRBDDEV/services 
+curl --cacert  
+  인증서를 사용하여 다운로드
+  curl -Ou admin:Cmpassdev1 --cacert /opt/Cloudera/ssl/ca-cert.pem https://XXXXXXXXXXXXXXXX:7183/api/v9/clusters/KRBDDEV/services
+curl -#  
+  Display transfer progress as a progress bar 
+curl -T 
+  curl을 이용한 파일 업로드 
+  cloudera manager web root 디렉토리 /usr/share/cmf/webapp/
+  기본적으로 세팅에서 업로드가 안되게 되어 있음.
+  curl -u admin:Cmpassdev1 -T /tmp/fetch.err -kv https://XXXXXXXXXXXXXXXX:7183/
+curl -X
+  사용할 http 메소드를 기술한다.(POST or GET)  
+  curl -XGET http://xxxxxxxxxxxxxxxx:19890/jobhistory
+curl -L
+  페이지가 없어졌을때 redirection URL에서 받아온다.  
+  
+########################################
+# how to use echo option
+########################################  
+echo -n 
+  줄바꿈 없이 출력한다. 아래명령어는 줄바꿈없이 한줄로 출력됨
+  echo -n `ls -al /tmp`
+echo -e "`ls -al /tmp`"
+  문자열 해석 기능이 있어 ls, df 등의 명령어를 
+  변수에 담아 출력할때 메일 본문에 사용한다. 명령줄을 쌍따온표로 감싸줘야 한다. 
+  
+########################################
+# find 파일의 type(디렉토리 또는 파일) 으로 검색하기
+########################################  
+#tmp directory 에서 type이 디렉토리고 datameer인 디렉토리를 찾는다.
+find /tmp/ -type d -name "datameer"
+#tmp directory 에서 type이 파일이고 CertAndKey.pfx 파일을 찾는다.
+find /tmp  -type f -name CertAndKey.pfx
+
+########################################
+# find 파일의 변경시간으로 검색하기
+########################################  
+#tmp directory 에서 변경된지 5분 미만의 파일 찾기
+find /tmp -mmin -5
+#tmp directory 에서 변경된지 3일(72시간) 전 보다 새로운
+find /tmp -mtime -3
+#tmp directory 에서 변경된지 4일(96시간 전에서 3일(72시간)전까지(하루치)
+find /tmp -mtime 3
+#tmp directory 에서 변경된지 4일(96시간)보다 오래된
+find /tmp -mtime +3
+#tmp directory 에서 변경된지 4일 전부터 변경된지 2일전까지 
+find /tmp -mtime -4 -mtime +1
+######################################################################
+# 퍼미션을 이용한 파일의 검색
+# -perm 644는 퍼미션이 정확히 644인 파일만 검색한다.
+# -perm +001는 오너, 그룹, 아더중 1이상 일치하는 파일을 모두 찾는다.
+# -perm +001는 other가 0이상인 파일을 찾는다.
+# -perm -644는 오너, 그룹, 아더가 모두 지정된 퍼미션 이상인것을 찾는다.
+######################################################################
+find ./ -name "*.*" -perm 644
+find ./ -name "*.*" -perm +001
+find ./ -name "*.*" -perm -644
+
+########################################
+# find 파일의 소유자와 소유그룹으로 검색하기
+########################################  
+#파일의 소유자가 bigsql인 파일을 검색한다. 
+find ./ -user bigsql -print
+#파일의 소유 그룹이 hadoop인 파일을 검색한다. 
+find ./ -user hadoop -print
+
+########################################
+# find 검색된 파일에 대해 처리하기
+########################################  
+#10일 이상된 파일 mv하기
+#i옵션 뒤의 LOG라는 변수에 find 명령의 리턴값을 저장한후 mv 명령어 뒤의 LOG에 출력한다.
+find /home/test/logs/ -mtime +10 -type -f | xargs -iLOG mv LOG /home/test/logs_bk/
+#10일 이상된 파일 삭제 하기
+find /home/test/logs/ -mtime +10 | xargs -i -t rm {}
+#bak 파일 삭제 하기
+ls | grep "\.bak$" | xargs rm
+
+######################################################################
+# 1년이상 오래된 logfile 삭제 하기
+# f옵션은 파일이 없을때 에러발생을 방지한다.
+# v는 삭제한 파일명을 화면에 표시한다.
+# -0 옵션은 xargs 옵션으로 사용하면 파일명에 공백이 있어도 에러발생을 방지한다.
+# -print : find 명령어 사용 시 -print를 하지 않으면 출력되지 않는 경우도 있다.
+# -print : find 명령어 사용 시 -print를 사용하면 파일이름에 개행문자가 들어 있는 경우 오류가 발생할 수 있다.
+# -print0 :  파일이름을 개행문자 없이 한줄로 표현해 준다. 파일일름 다음에 null문자를 붙여서 출력을 해주기 때문에
+#            파일이름에 공백이나 개행 문자가 있어도 에러가 발생하지 않는다. 
+######################################################################
+ find /var/log/myapp/ -name "*.log" -mtime +364 -print0 | xargs -0 rm -fv
+
+######################################################################
+# log 파일을 찾아서 error이 있는 문자열만 출력
+######################################################################
+ find ./ -name "*.log.*" -print | xargs grep "error" /dev/null
+
+
+######################################################################
+# awk를 사용한 문자열 조작
+######################################################################
+#공백을 구분자로 하여 특정 컬럼 출력
+ df -Ph | awk '{print $1}'
+
+#전체 출력
+ df -Ph | awk '{print}'
+ df -Ph | awk '{print $0}'
+
+#app 문자열이 포함된 줄만 출력
+ df -Ph | awk '/app/'
+ cat /etc/passwd | awk '/root/'
+
+#컬럼의 구분자를 콜론으로 변경하여 조회하기(-F:) 
+ cat /etc/passwd | awk -F: '{print $3}'
+
+#/dev 로 시작하는 줄만 출력하기(\는 escape 처리 문자)
+ df -Ph | awk '/^\/dev/{print}' 
+
+#/etc/passwd 중에서 숫자로 시작하는 줄만 출력(^는 시작한다는 의미)
+ awk '/^[1-9]/ {print}' /etc/passwd
+
+#/etc/passwd 중에서 bash로 끝나지 않는 줄만 출력($는 끝난다는 의미)
+ awk -F: '$7 !~ /bash$/ {print}' /etc/passwd
+
+# 패턴 필터링 (x03h2로 시작하는줄)
+  awk '/^19/{print}' /etc/hosts
+# 패턴 필터링 (x03h2로 끝나는 줄)  
+  awk '/x03h2$/{print}' /etc/hosts
+#패턴 필터링 (install 문자열앞에 g,p,a 가 있는 모든 줄
+#결과는 ginstall,pinstall,ainstall,pgainstall 모두 검색된다. 
+ ls -l | awk '/[gpa]install/ {print}'
+#패턴 필터링 (파일이든 디렉토리든 퍼미션이 600인 것들)
+#d- 문자로 시작하고 rw-------인 퍼미션인 파일들
+ ls -l | awk '/[d-]rw-------/ {print}'
+#패턴 필터링 (와일드 카드)
+ ls -l | awk '/bdicr101x0.h2/{print}'  
+#패턴 필터링 (숫자가 포함된 줄)  
+ awk '/[0-9]/{print}' /etc/hosts  
+#패턴 필터링 (문자가 포함된 줄)  
+ awk '/[a-Z]/{print}' /etc/hosts    
+  
+#/etc/passwd 중에서 uid가 500번 이하인 id만 출력
+ awk -F: '$3 <500 {print}' /etc/passwd
+#/etc/passwd 중에서 uid가 100보다 크고 500번 보다 작은 id만 출력
+ awk -F: '$3 > 100 && $3 < 500 {print}' /etc/passwd
+#/etc/passwd 중에서 uid가 496 또는 0인 id만 출력
+ awk -F: '$3 == 496 || $3 == 0 {print}' /etc/passwd
+#/etc/passwd 중에서 uid가  0이 아닌 id만 출력
+ awk -F: '$3 !~ 0 {print}' /etc/passwd
+
+#df -P 명령어에서 사용율의 합계
+ df -P | awk 'NR==1 {next} {sum += $3}; END {print sum/1024/1024 "G"}'
+#공백을 구분자로 사용하여 선택한 컬럼만 추가
+ df -Ph | awk '{ print $1, $3 }'
+#공백을 구분자로 사용하여 선택한 컬럼사이에 분리문자를 사용하여 출력
+ df -Ph | awk '{print $3 " "  $4}'
+#컬럼 간의 계산  
+ df -P | awk  '{ print $1, $2 - $3}' | awk '{ print $1, $2/1024/1024}'
+#Row Number 표시 ($0: 전체 컬럼)
+ df -Ph | awk '{ print NR, $0 }'
+#패턴 필터링 (주석 처리된 row만)
+ awk '/^####/{print}' /etc/hosts
+
+  
+############################################################
+# AWK를 이용한 파일 시스템 감시
+# awk -v threshold 변수값 지정
+# NR==1 {next} 현재의 row가 1인경우 skip
+# $6=="/xenv1" {next} 번째 컬럼이 /xenv1인경우 skip
+# $6=="/xenv2" {next} 번째 컬럼이 /xenv1인경우 skip
+# {sub("%","",$5)} $5에서 첫번째 나오는 "%"를 찾아서 ""로 대체한다.
+# sub의 경우 %%가 두번 연속 나오는 경우 한번만 replace 한다.
+# {gsub("%","",$5)} $5에 있는 모든 "%" 문자를 찾아서 ""로 대체한다.
+# printf 서식 지정자 출력
+#  %s 문자열 그대로 출력 
+#  %d\n" 5번열을 출력할때 %를 결합해서 출력하고 줄바꿈을 하라
+# 만약에 컬럼의 구분자를 변경하고 싶으면 아래 처럼 변경한다.
+# awk -F "," '명령줄'
+############################################################
+threshold=30
+message=$(df -Ph | awk -v threshold="$threshold" '
+   NR==1 {next}
+   $6=="/xenv1" {next}
+   $6=="/xenv2" {next}
+   {sub(/%/,"",$5)}
+   $5 > threshold {printf "%s is almost full: %d\n", $6, $5}')
+echo $message  
+  
+#############################################################
+예제 파일(students)
+John,P Physics 20 
+Rick,L Mechanical 21 
+Jack,T electrical 23 
+Larry,M Chemical 22 
+Phil,R Electrical 21 
+Mike,T mechanical 22 
+Paul,R Chemical 23 
+John,T Chemical 23 
+Tony,N Chemical 22 
+James,R Electrical 21
+##############################################################  
+#위의 파일 중에서 22 점이 넘는 사람만 출력
+cat students | awk -F " " '$3>22 {print}'
+ 
+#위의 파일중에서 J로 시작하는 사람을 추출하여 jfile로 저장하시요
+#출력 문자열 패턴과 파일명은 더블쿼팅해줘야 한다.
+# if 문에서 ~는 같다고 !~는 같지 않다 이다.
+
+# J로 시작하는 학생의 나이의 평균을 구하시오
+cat students | awk '{if($1 ~ "^J") sum+=$3
+if($1 ~ "^J") ++no} END {print sum/no}'
+
+
+패턴유형 설 명 
+BEGIN 입력파일을 읽어 들이기 전에, BEGIN 옆에 제시되는 { } 안의 
+Action을 실행시킵니다. 
+END 모든 입력을 처리한 후, END 옆에 제시되는 { } 안의 Action을 
+실행시킵니다. 
+expression 식을 평가한 후, 이 식이 참이면 즉 non-zero 이거나 non-null 인 경우,
+뒤의 Action을 실행시킵니다. 
+/re/ 정규식과 일치하는 문자열을 포함하고 있는 라인에서 Action을 
+실행시킵니다.  
+compound-
+pattern 복합 패턴이라는 것으로 여러 개의 expression을 괄호와 &&(and),
+||(or) , !(not) 로 연결시켜 그 결과가 참인 경우 Action을
+실행시킵니다.  
+pattern1,
+
+패턴유형 설 명 
+BEGIN 입력파일을 읽어 들이기 전에, BEGIN 옆에 제시되는 { } 안의 
+Action을 실행시킵니다. 
+END 모든 입력을 처리한 후, END 옆에 제시되는 { } 안의 Action을 
+실행시킵니다. 
+expression 식을 평가한 후, 이 식이 참이면 즉 non-zero 이거나 non-null 인 경우,
+뒤의 Action을 실행시킵니다. 
+/re/ 정규식과 일치하는 문자열을 포함하고 있는 라인에서 Action을 
+실행시킵니다.  
+compound-
+pattern 복합 패턴이라는 것으로 여러 개의 expression을 괄호와 &&(and),
+||(or) , !(not) 로 연결시켜 그 결과가 참인 경우 Action을
+실행시킵니다.  
+pattern1,
+
+########################################
+# how to use sed option
+below text is test.txt
+one two three, one two three
+four three two one
+one hundred
+and you used the command
+########################################
+sed 옵션
+-i 원본파일을 수정한다.
+# 출력명령(p)
+   아래명령은 프린트를 하라는 명령어 이다 기본적으로 sed는 출력을 하는데
+   출력명령을 추가하였기 때문에 2번출력된다.
+   -e 뒤에 지정된 명령에 스크립트를 전달한다.
+      sed -e 'p' test.txt
+   
+   아래 명령어는 -n으로 기본출력을 하지 않기 때문에 1번 출력된다.
+     -n은 사일런트 모드로 실행결과를 출력하지 않는다.
+      sed -n -e 'p' test.txt
+      sed -e '' test.txt
+   첫 행만 출력하기 
+      sed -n -e '1p' test.txt
+   5번 행만 출력하기 
+      sed -n -e '5p' test.txt	  
+   마지막 행만 출력하기
+      sed -n -e '$p' test.txt    
+   여러개의 파일에 대한 출력
+   아래 명령어는 각각의 파일에서 첫라인을 뽑는게 아니라
+   1줄만 출력된다. 이유는 여러개의 파일을 지정하면 라인번호가 
+   연속해서 체번이 된다. 
+      sed -n -e '1p' inputfile1 inputfile2
+   만약 각 각 파일의 첫번째 라인을 출력하고 싶으면 -s 옵션을 주어야 한다.
+      sed -sn -e '1p' inputfile1 inputfile2
+	  
+# sed 정규 표현식
+  시작과 끝을 나타내는 예약 문자
+  ^시작하는 문자 나타낸다.
+  $끝나는 문자를 나타낸다.
+
+# sed의 사용 예
+  - systemd를 포함하는 줄을 찾아서 출력해 준다.
+    sed -n -e '/systemd/p'
+  - nologin으로 끝나는 줄을 찾아서 출력해 준다.
+    sed -n -e '/nologin$/p'
+  - bin으로 시작하는 줄을 찾아서 출력해 준다.
+    sed -n -e '/^bin/p'
+  - 빈줄을 찾아서 출력해준다.(아무 문자가 없이 시작하고 아무 문자없이 끝나는 줄) 
+    sed -n -e '/^$/p'
+  - 하나의 문자라도 있는 줄을 찾아서 출력해 준다.(빈 라인은 제외)
+    sed -n -e '/./p'
+  - 하나의 문자만 있는 줄을 출력해준다.
+    sed -n -e '/^.$/p'
+  - admin문자를 포함하고 뒤에 false를 포함하는 문자(* 몇개의 캐릭터가 있어도 관계없음)
+    sed -n -e '/admin.*false/p'
+  - 1뒤에 0이나 3이 뒤따르는 문자를 포함하는 줄을 찾아서 출력
+    sed -n -e 's/1[0,3]/p'
+  - 1뒤에 0부터 5까지 문자가 뒤따르는 문자를 포함하는 줄을 찾아서 출력
+    sed -n -e '/1[0-5]/p'
+  - 1이 먼저나오고 임의의 모든 캐릭터 뒤에 2가 나오는 줄을 찾아서 출력
+    sed -n -e '/1.*2/p'
+  - 1과 2사이에 없거나 몇개의 숫자가 오는 줄을 찾아서 출력
+    sed -n -e '1/[0-9]*2/p' 
+  - /usr/ 문자를 포함하는 줄을 찾아 출력 특수문자를 포함하는 문자를 찾을 때 (escape 처리)
+    sed -n -e '/\/usr\/p'
+  - 아래와 같은 형식으로도 특수문자를 처리할 수 있다.
+    '\=<찾을 문자열>=p'
+    sed -n -e '\=/usr/=p'
+  - 확장된 정규 표현식 -E 옵션(escape 옵션없이 사용할 수 있다.)
+    (www)나 (mail)을 포함하는 문자를 찾아서 출력
+    sed -En -e '/(www)|(mail)/p'
+  - 정확히 35자인 라인을 찾아서 출력
+    sed -En -e '/^.{35}$/p'
+  - 정확히 0~35자인 라인을 찾아서 출력
+    sed -En -e '/^.{0,35}$/p'
+    sed -En -e '/^.{,35}$/p'
+  - 정확히 35자 이상인 라인을 찾아서 출력
+    sed -En -e '/^.{35,}$/p'
+  - 소스의 범위 제한 소스로 부터 1~5번째 줄을 출력
+    sed -n -e '1,5p'
+  - 소스의 범위 제한 소스로 부터 5번째 줄에서 마지막 까지 출력
+    sed -n -e '5,$p'
+  - 소스의 범위 제한 abc를 찾은 줄부터 XYZ를 찾은 줄까지 출력
+    sed -n -e '/abc/,/XYZ/p' 
+  - 소스의 범위 제한 지정된 5번 라인을 제외하고 출력
+    sed -n -e '5!p'
+  - 소스의 범위 제한 5~10번 라인이 아닌줄을 출력
+    sed -n -e '5,10!p'
+  - sys가 포함되지 않은 줄을 출력
+    sed -n -e '/sys/!p'
+  - 0~20 줄까지 중에서 'sys'가 포함된 줄부터 마지막 줄까지 출력
+    sed -n -e '/sys/,20p'
+  - 줄까지 중에서 'sys'가 포함된 줄부터 usr 포함된줄 사이의 모든 줄 출력
+    sed -n -e '/sys/,/usr/p'
+  - 줄까지 중에서 'sys'와 usr이 순차적으로 포함된 줄을 출력
+    sed -n -e '/sys/{/usr/p}'
+    위의 명령어는 아래명령어와 동일
+	sed -n -e '/sys.*usr/'
+  - 5라인 까지만 출력하고 종료 합니다.종료명령(q) 
+    sed -e '5q' 
+  - 5라인 까지만 출력하고 종료 합니다.종료명령(q) 
+    sed -n -e '2p' -e '5q' 
+#sed replace
+  - 단순 찾아 바꾸기
+    sed 's/ovr-usr/ovr-user/' df.txt
+  - Int나 int를 찾아서 long로 변경한다.
+    sed 's/[iI]nt/long/' src.txt
+  - 줄번호를 지정하여 첫줄의 create를 찾아서 create or replace로 변경한다.
+    sed '1s/create/create or replace/' src.txt
+  -g(global) 옵션이 없으면 한줄에서 첫번째 패턴 매치되는 단어만 replace된다.
+    sed 's/one/ONE/'  test.txt 
+  - g(global) 옵션이 있으면 전체파일에서 패턴 매치되는 모든 단어만 replace된다.
+    sed 's/one/ONE/g'  test.txt   
+# sed append insert .
+  - 첫번째 줄 다음줄 다음에 append 한다. 
+    sed '1a many number' test.txt
+  - 첫번째 줄에 insert 첫번째 줄에 many number 들어 간다.
+    sed '1i many number' test.txt
+  - 행이 포함된 라인 번호 찾기
+    sed -n '/hundred/=' test.txt
+  - 전체 라인 수를 리턴한다.
+    sed -n '$=' test.txt
+   
+9. 마지막 line을 replace 한다.
+   sed '$c last line of the file' test.txt 
+   output :
+   one two three, one two three
+   four three two one
+   one hundred
+   last line of the file
+   
+10. 첫번째 line을 replace 한다.   
+   sed '1c first line of the file' test.txt 
+   
+11. 패턴 검색하여 찾은열 다음열에 문자열을 삽입한다.
+   sed '/four/a fourth' test.txt   
+   output :
+   one two three, one two three
+   four three two one
+   fourth
+   one hundred
+   and you used the command
+   
+12. 패턴 검색하여 찾은열 전열에 문자열을 삽입한다.
+   sed '/four/i fourth' test.txt   
+   output :
+   one two three, one two three
+   four three two one
+   fourth
+   one hundred
+   and you used the command   
+
+13. 삭제 명령실행
+   sed '/TD/d' 1.html : TD 문자가 포함된 줄을 삭제하여 출력한다.
+   sed '/Src/!d' 1.html : Src 문자가 있는 줄만 지우지 않는다.
+   sed '1,2d' 1.html : 처음 1줄, 2줄을 지운다.
+   sed '1d' 1.html : 처음 1줄을 지운다.
+   sed '/^$/d 1.html : 공백라인을 삭제하는 명령이다
+   sed 's/test//g' : test라는 단어를 찾아서 공백으로 치환한다.
+
+14. 지정된 범위에서만 찾아 바꾸기
+   sed '1,10s/test//g' : 1라인부터 10라인까지 test라는 단어를 찾아서 공백으로 치환한다.
+   
+15. 해당 라인만 출력하기
+    sed '/int/p' src.txt
+	
+###################################################### 
+# dos2unix
+###################################################### 
+function dos2unix () {
+sed -i 's/\r//g' *.sh
+sed -i 's/^M$//g' *.sh
+}
+   
+########################################
+# 숫자 비교
+# gt lt le ge eq ne(not equal)
+########################################   
+num1=$1
+num2=$2
+num3=$3
+
+echo "param1 $num1"
+echo "param2 $num2"
+echo "param3 $num3"
+
+if [ $num1 -eq $num2 ]; then
+  echo "param1 and parma2 same"
+elif [ $num1 -gt $num2 ]; then
+  echo "param1 is greater than parma2"
+elif [ $num1 -lt $num2 ]; then
+  echo "param1 lt less than parma2"
+fi
+
+if [ $num1 -ge $num2 ]; then
+  echo "param1 is greater or same than parma2"
+fi
+
+if [ $num1 -le $num2 ]; then
+  echo "param1 is less or same than parma2"
+fi
+
+###################
+#and or expression
+###################
+if [ $num1 -gt $num2 ] && [ $num1 -gt $num3 ]; then
+  echo "param1 is gretest of all"
+fi
+
+if [ $num1 -gt $num2 ] || [ $num1 -gt $num3 ]; then
+  echo "param1 is grater than param2 or param3"
+fi
+
+##########################
+# 숫자 기호를 사용한 표현
+#use ((
+##########################
+
+if  (( "$num1" == "$num2" )); then
+  echo "use ((  :  param1 and parma2 are same"
+elif (( "$num1" > "$num2" )); then
+  echo "use ((  : param1 is greater than parma2"
+elif (( "$num1" < "$num2" )); then
+  echo "use ((  : param1 lt lower than parma2"
+fi
+
+##########################
+# 숫자 연산 표현
+#use ((
+##########################
+
+for i in {1..100}
+do
+  # 산술 확장을 이용해서 파일명에 3을 곱해서 계산한
+  # 값을 텍스트 파일에 저장
+  #(2)
+  echo $((i * 3)) > ${i}.txt
+done
+########################################
+# 조건에 만족하는 숫자 출력
+# 참이면 a를 출력 거짓이면 b를 출력
+# "(( ))" 안에는 숫자만 올 수 있다.
+########################################
+a=3
+b=2
+echo $(( a < b ? a : b ))
+
+########################################
+# 문자 비교, 문자 테스트
+######################################## 
+
+char1="$1"
+char2="$2"
+
+echo "param1 $char1"
+echo "param2 $char2"
+
+if [ $char1 == $char2 ]; then
+  echo "== : param1 and param2 are same"
+elif [ $char1 != $char2 ]; then
+  echo "!= : param1 is not equal parma2"
+fi
+
+if [ ! -z "$char1" ]; then
+  echo "! -z : param1 length is not zero"
+else
+  echo "! -z : param1 length is zero"
+fi  
+if [ -n "$char1" ]; then
+  echo "!= : param1 is not null"
+else 
+  echo "!= : param1 is null" 
+fi
+
+########################################
+# 문자 연결
+######################################## 
+
+today=`date  +%Y%m%d`
+echo ${today}_log.log
+
+############################################################################
+# 배열의 선언과 추출
+# { 를 붙이면 one을 추출하지만
+# { 를 붙이지 않으면 첫번재 요소 zero에 [1]를 연결한 문자를 리턴 한다.
+# 배열을 선언할 때는 요소의 구분자로 공백을 넣어준다.(,를 넣어주면 하나의 요소로 인식한다.)
+############################################################################
+
+declare -a number=("zero" "one" "two")
+echo ${number[1]}
+
+############################################################################
+# 로그파일에서 "PluginManifestParser" 문자열 갯수 출력
+# grep -c 
+############################################################################
+logfile="/var/app/datameer/current/logs/conductor.log"
+filter_count=$(grep -c "PluginManifestParser" $logfile)
+echo "ERROR count : $filter_count"
+
+############################################################################
+# 파일에서 줄 수 출력
+# wc <파일명>
+# 옵션 -c(bytes) -m(char) -l(line) -w(word)
+# output 줄수 단어수 라인수 파일명을 리턴한다.
+# 6 20 87 test.txt
+############################################################################
+logfile="/var/app/datameer/current/logs/conductor.log.1"
+char_count=$(wc  $logfile)
+echo "char count : $char_count"
+
+############################################################################
+# 날짜 관련 조작
+############################################################################
+#내일
+date -d '1day' +%Y%m%d
+#어제 
+date -d '1day ago' +%Y%m%d
+#2틀전
+date -d '2day ago' +%Y%m%d
+#다음달
+date -d '1month' +%Y%m%d
+#한달 전
+date -d '1month ago' +%Y%m%d
+#년도만 얻기
+date +%Y
+#월만 얻기
+date +%m
+#일만 얻기
+date +%d
+############################################################################
+# 날짜관련 비교(epoch)
+############################################################################
+day1="20140102 10:10:10"
+day2="20140101 10:10:10"
+#epoch 초 얻기
+#하루는 1440분 86400초
+epoch_day1=$(date -d "$day1" '+%s')
+epoch_day2=$(date -d "$day2" '+%s')
+interval=`expr \( $epoch_day1 - $epoch_day2 \) / 86400`
+echo $interval
+## mysql unix time에서 시간 구하기 함수
+select FROM_UNIXTIME(1333063912)
+
+############################################################################
+# 로그파일 작성시 날짜의 입력
+############################################################################
+LOG_FILE=LOG.txt
+function log_it () {
+    echo "$@"
+    echo "[$(date +"%Y/%m/%d %T")]: $@" >> $LOG_FILE
+}
+
+log_it "This is Test!"
+
+
+########################################
+# 디렉토리의 파일리스트 표시
+######################################## 
+#!/bin/bash
+for logfile in /tmp/*.log.*
+do
+  echo $logfile
+done
+
+###################################################### 
+# basename 디렉토리의 경로를 제거한 파일리스트 표시
+# basename에 2번째 파라메터로 확장자를 
+# 입력하면 확장자가 제거된 파일리스트를 얻을수 있다.
+###################################################### 
+#!/bin/bash
+for logfile in /tmp/*.err
+do
+  logname=$(basename $logfile .err)
+  echo $logname
+done
+
+
+###################################################### 
+#첫번째 파라메터를 파일명으로 받고 확장자를 제외한 파일명 얻기
+###################################################### 
+filename=${1%.*}
+
+
+
+
+############################################################################ 
+# 환경설정 파일에서 속성에 매핑된 value 추출하기
+# 환경설정 파일에는 cdh.parcel.version=5.7.0이라고 입력되어있음
+# `cat config.ini|grep ^cdh.parcel.version|awk -F\= '{print $2}'`
+# config.ini에서 grep으로 ^cdh.parcel.version로 시작하는 열을 검색하고
+# 검색된 결과를 awk를 이용하여 = 구분자로 구분한후 2번째 컬럼을 출력
+############################################################################
+ 
+CDH_PARCEL_VERSION=`cat config.ini|grep ^cdh.parcel.version|awk -F\= '{print $2}'`
+grep_version=`cat config.ini|grep cdh.parcel.version`
+echo "grep_version" $grep_version
+echo "CDH_PARCEL_VERSION" $CDH_PARCEL_VERSION
+
+############################################################################ 
+# 메일 발송하기
+#mailer_util.sh 
+# SYNTAX: bash mailer_util.sh <FROM> <TO> <SUBJECT> <ATTACHMENT>
+# EXAMPLE: bash mailer_util.sh "$FROM" "$TO" "$SUBJECT" "$CSVFILE"
+############################################################################ 
+FROM=$1
+TO=$2
+SUBJECT=$3
+boundary="ZZ_/afg6432dfgkl.94531q"
+body=`cat "$4"`
+
+declare -a attachments
+attachments=( $5 )
+
+get_mimetype(){
+  # warning: assumes that the passed file exists
+  file --mime-type "$1" | sed 's/.*: //' 
+}
+
+
+
+# Build headers
+{
+
+printf '%s\n' "From: $FROM
+To: $TO
+Subject: $SUBJECT
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary=\"$boundary\"
+
+--${boundary}
+Content-Type: text/plain; charset=\"US-ASCII\"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+$body
+"
+ 
+# now loop over the attachments, guess the type
+# and produce the corresponding part, encoded base64
+for file in "${attachments[@]}"; do
+
+  [ ! -f "$file" ] && echo "Warning: attachment $file not found, skipping" >&2 && continue
+
+  mimetype=$(get_mimetype "$file") 
+ 
+  printf '%s\n' "--${boundary}
+Content-Type: $mimetype
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename=\"$file\"
+"
+ 
+  base64 "$file"
+  echo
+done
+ 
+# print last boundary with closing --
+printf '%s\n' "--${boundary}--"
+ 
+} | sendmail -t -oi   
+
+
+#################################################
+# key=value 형식의 문자열을 가지고 변수 선언하기
+# 프로퍼티 파일에 정의된 key=value 형식의 문자열을 이용하여 변수로 선언이 가능하다. 
+#################################################
+ var="hostname=server1"
+ eval $var
+ echo $hostname
+
+vi 명령어
+1. 현재 라인 부터 파일 끝까지 삭제
+dG
+2. 커서의 위치부터 한줄 끝까지 삭제
+d$
+3. 한 단어 삭제
+dw
+
+1 gbyte 테스트 이미지 생성방법
+fallocate -l Image_Size_Here /path/to/image.img
+
+
+1.postgresql 백업
+pgdump -p22543 hive > hive_20180101.sql
+
+1.mysql 백업
+mysqldump -uflamingo -pflamingo flamingo2 > flaming2.sql
+
+
+ $ yarn rmadmin -getServiceState rm1
+ active
+
+ $ yarn rmadmin -getServiceState rm2
+ standby
+If automatic failover is enabled, you can not use manual transition command. Though you can override this by –forcemanual flag, you need caution.
+
+ $ yarn rmadmin -transitionToStandby rm1
+ 
+ 
+
+#######################################
+oiv 사용법
+########################################
+	
+	
+클러스터에 작은 파일의 존재를 확인하려면 다음 단계를 수행하십시오.
+
+Hadoop OIV는 관리자가 사람이 읽을 수없는 hadoop 네임 스페이스 fsimage를 분석 할 수있게합니다.
+
+fsimage 분석에 도움이되는 일부 프로세서는 다음과 같습니다.
+ls : lsr 명령과 유사합니다. 디렉토리, 권한, 복제, 소유자 그룹, 파일 크기, 수정 날짜 및 경로로 구성됩니다.
+
+들여 쓰기 :이 프로세서는 이미지 버전, 생성 시간 스탬프, 노드 및 블록 세부 정보를 포함하는 출력을 구성하는 들여 쓰기 된 양식을 사용합니다.
+
+Delimited : 경로, 복제, 수정 시간, 액세스 시간, 블록 크기, 블록 수, 파일 크기, 네임 스페이스 할당량, 디스크 공간 할당량, 사용 권한, 사용자 이름 및 그룹 이름과 같은 세부 정보를 포함하는 탭으로 구분 된 프로세서 출력입니다.
+
+XML : lsr과 비슷한 세부 정보를 출력하는 XML 기반 프로세서입니다.
+
+FileDistribution : 파일 크기에 따라 파일 수를 버킷 팅하는 것을 기반으로하는 프로세서입니다. 파일 크기 범위에 속하는 파일은 함께 그룹화되어 집계됩니다.
+
+다음은 ls 프로세서를 사용하여 OIV를 사용하여 작은 파일의 수를 분석하는 프로세스입니다.
+1. FSImage 다운로드 :
+
+네임 노드의 dfs.name.dir 위치에서 fsimage _ #######를 다운로드하십시오.
+
+2. FSImage로드 :
+
+FS 이미지를 복사 한 노드에서. 아래 명령을 실행하십시오.
+
+OIV 처리는 메모리가 많이 필요합니다. FSImage의 크기에 따라 JVM 값을 늘리십시오.
+
+2 단계가 끝나면 읽기 전용 WebHDFS API를 제공하는 웹 서버가 있습니다.
+
+export HADOOP_OPTS=“-Xms<HighValue>m -Xmx<HighValue>m $HADOOP_OPTS"
+nohup hdfs oiv -i fsimage_####### -o fsimage_#######.txt &
+3. "ls -R"보고서 생성 :
+
+nohup hdfs dfs -ls -R webhdfs://127.0.0.1:5978/ > /data/home/hdfs/lsrreport.txt &
+4. 생성 된 보고서에 대한 하이브 스키마 만들기 :
+
+add jar /usr/hdp/current/hive/lib/hive-contrib.jar;
+CREATETABLE lsr (permissions STRING, replication STRING, owner STRING, ownergroup STRING, size STRING, fileaccessdate STRING, time STRING, file_path STRING ) ROW FORMAT SERDE 'org.apache.hadoop.hive.contrib.serde2.RegexSerDe' WITH SERDEPROPERTIES ("input.regex" = "(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(.*)"); 
+load data inpath ‘/data/home/hdfs/lsrreport.txt’ overwrite into table lsr;
+create view lsr_view as select (case substr(permissions,1,1) when 'd' then 'dir' else 'file'end) as file_type,owner,cast(size as int) as size, fileaccessdate,time,file_path from lsr;
+5. 1MB 미만의 파일을 확인하십시오.
+
+select relative_size,fileaccessdate,file_path as total from (select (case size < 1048576 when true then 'small' else 'large' end) as relative_size,fileaccessdate,file_path from lsr_view where file_type='file') tmp where relative_size='small' limit 100;
+링크 : http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsImageViewer.html
+
+파티션의 파일 연결
+ALTER TABLE [table] PARTITION([partition]) CONCATENATE;
+ALTER TABLE [table] PARTITION([partition]) CONCATENATE;
+최상의 솔루션은 여러 개의 작은 파일을 제거하기 위해 선택 삽입을 수행하는 것입니다.
+
+   
