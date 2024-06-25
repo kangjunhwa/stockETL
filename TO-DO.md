@@ -46,4 +46,11 @@
    TICKERS 정보를 파라메터를 받도록 설계한다.
    \n 줄바꿈 문자를 이용하여 loop를 돌려서 yfinance를 호출한다.
    
+   
+   TICKERS_LINES=$(echo $TICKERS | tr "," "\n")
+
+	for TICKER in $TICKERS_LINES
+	do
+		echo "[$TICKER]"
+	done
 
