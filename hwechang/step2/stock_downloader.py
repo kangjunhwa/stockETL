@@ -48,6 +48,8 @@ def process_ticker(ticker, previous_date):
     now = datetime.datetime.now()
     formatted_start_time = previous_date  # 이전 날짜
     formatted_end_time = now.strftime("%Y-%m-%d")  # 현재 날짜
+    # print('이전날짜', formatted_start_time)
+    # print('현재날짜', formatted_end_time)
 
     # 날짜별 디렉토리 생성
     date_dir = f"/home/hwet/datalake/csv/{formatted_end_time}"
