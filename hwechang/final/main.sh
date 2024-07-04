@@ -6,14 +6,8 @@
 # 기본경로 지정
 BASE_DIR="$HOME/stockETL/final"
 
-
 # DB 정보 및 ticker 정보 가져오기
-# source /home/hwet/datalake/db_config.sh
-# source /home/hwet/datalake/ticker.info
 source "$BASE_DIR/setup.sh"
-
-# 현재 연도 구하기
-current_year=$(date +'%Y')
 
 # 사용자 정보(Log에 찍기위함)
 HOST=$(whoami)

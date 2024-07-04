@@ -75,7 +75,7 @@ def process_ticker(ticker, csv_dir):
             df.to_csv(file_name)
             num_rows = len(df)  # 데이터프레임의 행 수
             print(num_rows)
-            return num_rows
+            return num_rows     # print값을 받아서 사용하기 때문에 return 은 필요없을듯함.
         else:
             print("no_data")
             return "no_data"

@@ -18,7 +18,7 @@ IFS=',' read -r -a ticker_array <<< "$TICKERS"
 for ticker in "${ticker_array[@]}"; do
 
     	# Job 시작 시간 기록
-	job_start_time=$(date +'%Y-%m-%d %H:%M:%S')
+		job_start_time=$(date +'%Y-%m-%d %H:%M:%S')
     
     	# csv_result 설정
     	csv_result=$(python "$BASE_DIR/stock_downloader.py" "$ticker" "$BASE_DIR")
@@ -37,11 +37,11 @@ for ticker in "${ticker_array[@]}"; do
 
         	filesize=$(stat -c%s "$csv_file")
 	
-		csv_content=$(cat "$csv_file")
+			csv_content=$(cat "$csv_file")
         	csv_summary+="\nTicker: $ticker\nSize: $filesize bytes\n$csv_content\n"	
 
     	else
-		# 파일이 존재하지 않으면 파일크기 0 
+			# 파일이 존재하지 않으면 파일크기 0 
         	filesize=0
     	fi
     
